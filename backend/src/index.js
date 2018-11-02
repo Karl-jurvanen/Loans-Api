@@ -26,7 +26,6 @@ test.get(`${apiPath}/test`, async (ctx) => {
 app.use(test.routes());
 app.use(test.allowedMethods());
 
-
 // Start the server and keep listening on port until stopped
 app.listen(port);
 
