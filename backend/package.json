@@ -5,7 +5,10 @@
   "author": "karl Jurvanen <karl.jurvanen@eng.tamk.fi>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index.js -w src --exec babel-node"
+    "dev": "nodemon src/index.js -w src --exec babel-node",
+    "lint:es": "eslint src",
+    "test": "yarn lint:es",
+    "test:watch": "nodemon -w src --exec 'yarn test'"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
@@ -14,7 +17,12 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.1",
     "babel-preset-env": "^1.7.0",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-import-resolver-node": "^0.3.2",
+    "eslint-plugin-import": "^2.14.0",
     "nodemon": "^1.18.5"
   }
 }
