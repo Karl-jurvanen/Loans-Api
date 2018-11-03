@@ -23,7 +23,6 @@ const connectionSettings = {
   namedPlaceholders: true,
 };
 
-
 test.get(`${apiPath}/test`, async (ctx) => {
   // Tell the HTTP response that it contains JSON data encoded in UTF-8
   try {
@@ -44,7 +43,6 @@ test.get(`${apiPath}/test`, async (ctx) => {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
-
 });
 
 app.use(test.routes());
