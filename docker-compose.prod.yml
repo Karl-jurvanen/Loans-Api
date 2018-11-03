@@ -4,6 +4,8 @@ services:
     image: "${API_IMAGE}"
     ports:
       - "9000:9000"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     restart: always
   db:
     image: mysql:8.0.3

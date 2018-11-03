@@ -8,6 +8,8 @@ services:
       - "9000:9000"
     volumes:
       - ./backend:/opt/app
+    environment:
+      MYSQL_ROOT_PASSWORD: db_rootpass
     restart: always
   backend_test:
     build:
@@ -18,6 +20,8 @@ services:
       - "9005:9005"
     volumes:
       - ./backend:/opt/app
+    environment:
+      MYSQL_ROOT_PASSWORD: db_rootpass
     restart: always
   db:
     image: mysql:8.0.3
