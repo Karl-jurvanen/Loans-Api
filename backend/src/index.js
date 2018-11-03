@@ -2,7 +2,6 @@ import 'babel-polyfill';
 import Koa from 'koa';
 import Router from 'koa-router';
 import mysql from 'mysql2/promise';
-
 // The port that this server will run on, defaults to 9000
 const port = process.env.PORT || 9000;
 
@@ -19,7 +18,7 @@ const connectionSettings = {
   host: 'db',
   user: 'root',
   database: 'db_1',
-  password: 'db_rootpass',
+  password: process.env.MYSQL_ROOT_PASSWORD,
   namedPlaceholders: true,
 };
 
