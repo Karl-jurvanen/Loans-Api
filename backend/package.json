@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.js -w src --exec babel-node",
     "lint:es": "eslint src",
     "test": "yarn lint:es",
-    "test:watch": "nodemon -w src --exec 'yarn test'"
+    "test:watch": "nodemon -w src --exec 'yarn test'",
+    "build": "babel src -d build",
+    "start": "node build/index.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

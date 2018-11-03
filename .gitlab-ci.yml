@@ -1,0 +1,71 @@
+variables:
+  REMOTE_HOST: deploy@172.16.6.14
+  REMOTE_DIR: nodejs-mysql-app
+
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  image: node:alpine
+  stage: test
+  cache:
+    paths:
+      - ~/.cache/yarn/
+  artifacts:
+    paths:
+      - backend/node_modules/
+  script:
+    - cd backend
+    - yarn install
+    - yarn test
+
+build:
+  image: node:alpine
+  stage: build
+  dependencies:
+    - test
+  artifacts:
+    paths:
+      - backend/node_modules/
+      - backend/build/
+  script:
+    - cd backend
+    - yarn build
+    - yarn install --prod
+
+deploy:
+  image: docker
+  stage: deploy
+  services:
+    - docker:dind
+  dependencies:
+    - build
+  script:
+    - export API_IMAGE="${CI_REGISTRY_IMAGE}/api"
+    - apk update && apk add rsync openssh
+    - docker login -u gitlab-ci-token -p "${CI_JOB_TOKEN}" "${CI_REGISTRY}"
+    # Prepare SSH settings
+    - mkdir -p ~/.ssh && (umask  077 ; echo "${DEPLOY_KEY_PRIVATE}" | base64 -d > ~/.ssh/id_rsa)
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    # Build containers
+    - docker build --no-cache -f .dockerfiles/BackendProd -t "${API_IMAGE}" .
+    # Push to remote
+    - docker push "${API_IMAGE}"
+    # Prepare files for transfer
+    - mkdir "${REMOTE_DIR}"
+    - cp docker-compose.prod.yml "${REMOTE_DIR}/docker-compose.yml"
+    # Setup env
+    - echo "API_IMAGE=${API_IMAGE}" >> "${REMOTE_DIR}/.env"
+    - echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" >> "${REMOTE_DIR}/.env"
+    # Copy files to server
+    - rsync -r "${REMOTE_DIR}" "${REMOTE_HOST}:./"
+    # Run container-setup.sh to set up Docker environment on the remote server
+    - ssh ${REMOTE_HOST} /bin/bash "
+        echo ${REMOTE_DIR};
+        cd ~/$REMOTE_DIR;
+        docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY;
+        docker-compose pull;
+        docker-compose up -d;
+      "

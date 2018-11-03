@@ -1,0 +1,20 @@
+version: '3'
+services:
+  backend:
+    image: "${API_IMAGE}"
+    ports:
+      - "9000:9000"
+    restart: always
+  db:
+    image: mysql:8.0.3
+    volumes:
+      - /opt/mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: db_1
+    restart: always
+  mywebsql:
+    image: quantumobject/docker-mywebsql
+    ports:
+      - "9001:80"
+    restart: always
