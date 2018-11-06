@@ -5,6 +5,16 @@ import mysql from 'mysql2/promise';
 import KoaBody from 'koa-bodyparser';
 import Url from 'url';
 
+import { connectionSettings } from './settings';
+import { initDB } from './fixtures';
+import { databaseReady } from './helpers';
+
+// Initialize DB
+(async () => {
+  await initDB();
+  await databaseReady();
+})();
+
 // The port that this server will run on, defaults to 9000
 const port = process.env.PORT || 9000;
 
@@ -16,14 +26,6 @@ const test = new Router();
 const todos = new Router();
 // Define API path
 const apiPath = '/api/v1';
-
-const connectionSettings = {
-  host: 'db',
-  user: 'root',
-  database: 'db_1',
-  password: process.env.MYSQL_ROOT_PASSWORD,
-  namedPlaceholders: true,
-};
 
 test.get(`${apiPath}/test`, async (ctx) => {
   // Tell the HTTP response that it contains JSON data encoded in UTF-8
