@@ -11,8 +11,8 @@ import { databaseReady } from './helpers';
 
 // Initialize DB
 (async () => {
-  await initDB();
   await databaseReady();
+  await initDB();
 })();
 
 // The port that this server will run on, defaults to 9000
