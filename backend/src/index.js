@@ -280,10 +280,13 @@ todos.del(todoPath, async (ctx) => {
 
   try {
     const conn = await mysql.createConnection(connectionSettings);
-    const [status] = await conn.execute(`
+    const [status] = await conn.execute(
+      `
           DELETE FROM todos
           WHERE id = :id;
-        `, { id });
+        `,
+      { id },
+    );
 
     if (status.affectedRows === 0) {
       // The row did not exist, return '404 Not found'
@@ -296,7 +299,6 @@ todos.del(todoPath, async (ctx) => {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
-
 });
 
 app.use(test.routes());
