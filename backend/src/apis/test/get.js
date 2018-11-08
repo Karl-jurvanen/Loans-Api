@@ -1,10 +1,8 @@
 import mysql from 'mysql2/promise';
-import Router from 'koa-router';
 import { connectionSettings } from '../../settings';
 import { test, apiPath } from '../constants';
 
-
-test.get(`${apiPath}/test`, async (ctx) => {
+export default test.get(`${apiPath}/test`, async (ctx) => {
   // Tell the HTTP response that it contains JSON data encoded in UTF-8
   try {
     const conn = await mysql.createConnection(connectionSettings);
@@ -25,5 +23,3 @@ test.get(`${apiPath}/test`, async (ctx) => {
     ctx.throw(500, error);
   }
 });
-
-export default test;
