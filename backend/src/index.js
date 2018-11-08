@@ -9,11 +9,12 @@ import { connectionSettings } from './settings';
 import { initDB } from './fixtures';
 import { databaseReady } from './helpers';
 import { checkAccept, checkContent } from './middleware';
+import { test } from './apis';
 
 // Initialize DB
 (async () => {
-  await databaseReady();
   await initDB();
+  await databaseReady();
 })();
 
 // The port that this server will run on, defaults to 9000
@@ -23,32 +24,9 @@ const port = process.env.PORT || 9000;
 const app = new Koa();
 const koaBody = new KoaBody();
 // Instantiate routers
-const test = new Router();
 const todos = new Router();
 // Define API path
 const apiPath = '/api/v1';
-
-test.get(`${apiPath}/test`, async (ctx) => {
-  // Tell the HTTP response that it contains JSON data encoded in UTF-8
-  try {
-    const conn = await mysql.createConnection(connectionSettings);
-    const [data] = await conn.execute(`
-        SELECT *
-        FROM test_table
-      `);
-
-    console.log('Data fetched:', data);
-
-    // Tell the HTTP response that it contains JSON data encoded in UTF-8
-    ctx.type = 'application/json; charset=utf-8';
-
-    // Add stuff to response body
-    ctx.body = { greeting: 'Hello world!', data };
-  } catch (error) {
-    console.error('Error occurred:', error);
-    ctx.throw(500, error);
-  }
-});
 
 // Define todos paths
 const todosPath = `${apiPath}/todos`;
