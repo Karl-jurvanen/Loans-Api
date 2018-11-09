@@ -1,9 +1,9 @@
 import mysql from 'mysql2/promise';
 import { connectionSettings } from '../../settings';
-import { test, apiPath } from '../constants';
 import { checkAccept } from '../../middleware';
+import { loanSystem, equipmentPath } from '../constants';
 
-export default test.get(`${apiPath}/test/:id`, checkAccept, async (ctx) => {
+loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
   const { id } = ctx.params;
   console.log('.get id contains:', id);
 
@@ -15,8 +15,8 @@ export default test.get(`${apiPath}/test/:id`, checkAccept, async (ctx) => {
     // call GetDevices();
     const [data] = await conn.execute(
       `
-        call getDevice(:id);
-          `,
+          call getDevice(:id);
+            `,
       { id },
     );
 
@@ -27,3 +27,5 @@ export default test.get(`${apiPath}/test/:id`, checkAccept, async (ctx) => {
     ctx.throw(500, error);
   }
 });
+
+export default loanSystem;

@@ -41,7 +41,7 @@ export default todos.get(todosPath, checkAccept, async (ctx) => {
     }
     return query;
   };
-  const orderBy = parseSortQuery({ urlSortQuery: sort, whitelist: ['id', 'done'] });
+  const orderBy = parseSortQuery({ urlSortQuery: sort, whitelist: ['id', 'done', 'text'] });
 
   try {
     const conn = await mysql.createConnection(connectionSettings);

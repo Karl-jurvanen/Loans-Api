@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import Koa from 'koa';
 import { initDB } from './fixtures';
 import { databaseReady } from './helpers';
-import { test, todos } from './apis';
+import { test, todos, loanSystem } from './apis';
 
 // Initialize DB
 (async () => {
@@ -20,6 +20,8 @@ app.use(test.routes());
 app.use(test.allowedMethods());
 app.use(todos.routes());
 app.use(todos.allowedMethods());
+app.use(loanSystem.routes());
+app.use(loanSystem.allowedMethods());
 // Start the server and keep listening on port until stopped
 app.listen(port);
 
