@@ -9,16 +9,28 @@ export default loanSystem.get(`${equipmentsPath}`, checkAccept, async (ctx) => {
   const url = Url.parse(ctx.url, true);
   const { sort } = url.query;
 
-  // const orderBy = parseSortQuery({ urlSortQuery: sort, whitelist: ['id', 'done'] });
+  const orderBy = parseSortQuery({
+    urlSortQuery: sort,
+    whitelist: ['id', 'code', 'name', 'info', 'person_in_charge'],
+  });
 
   try {
+    // first call getDevices stored procedure that stores data we need into temporary table called
+    // temp. Second query is to order the table based on orderBy.
+
     const conn = await mysql.createConnection(connectionSettings);
-    const [data] = await conn.execute(`
-                call getDevices();
+    await conn.execute(`
+              call getDevices();
             `);
 
+    const [data] = await conn.execute(`
+            SELECT * 
+            FROM temp
+            ${orderBy};
+          `);
+
     // Return all todos
-    ctx.body = data[0];
+    ctx.body = data;
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);

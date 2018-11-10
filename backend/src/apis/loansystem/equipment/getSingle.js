@@ -12,7 +12,7 @@ export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
   }
   try {
     const conn = await mysql.createConnection(connectionSettings);
-    // call GetDevices();
+    // call stored procedure GetDevice that contains query
     const [data] = await conn.execute(
       `
         call getDevice(:id);
@@ -20,7 +20,6 @@ export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
       { id },
     );
 
-    // Return all todos
     ctx.body = data[0][0];
   } catch (error) {
     console.error('Error occurred:', error);

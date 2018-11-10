@@ -140,12 +140,15 @@ DELIMITER $$
 USE `db_1`$$
 CREATE PROCEDURE GetDevices()
    BEGIN
+   DROP TEMPORARY TABLE IF EXISTS temp;
+   CREATE TEMPORARY TABLE temp AS (
 SELECT 
     laite.id,
     laite.koodi as 'code',
     laitetyyppi.nimi as 'name',
     laitetyyppi.tiedot as 'info',
-    CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi) AS 'person in charge'
+    GROUP_CONCAT( DISTINCT CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi)
+    SEPARATOR ', ') AS 'person_in_charge'
 FROM
     laitetyyppi
         LEFT OUTER JOIN
@@ -154,7 +157,9 @@ FROM
     henkilo ON (vastuuhenkilo.henkilo_id = henkilo.id)
         INNER JOIN
     laite ON (laitetyyppi.id = laite.laitetyyppi_id)
-GROUP BY laite.koodi;   
+GROUP BY laite.koodi
+);
+
 END$$
 
 DELIMITER ;
@@ -177,7 +182,8 @@ CREATE PROCEDURE GetDevice(
     laite.koodi as 'code',
     laitetyyppi.nimi as 'name',
     laitetyyppi.tiedot as 'info',
-    CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi) AS 'person in charge'
+    GROUP_CONCAT( DISTINCT CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi)
+    SEPARATOR ', ') AS 'person_in_charge'
 FROM
     laite,
     laitetyyppi,
@@ -187,7 +193,8 @@ WHERE
     laite.laitetyyppi_id = laitetyyppi.id
         AND laitetyyppi.id = vastuuhenkilo.laitetyyppi_id
         AND henkilo.id = vastuuhenkilo.henkilo_id
-        AND laite.id = deviceID;
+        AND laite.id = deviceID
+GROUP BY laite.id;
    END$$
 
 DELIMITER ;
@@ -214,7 +221,7 @@ SELECT
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'condition',
     GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-        SEPARATOR ', ') AS 'person in charge'
+        SEPARATOR ', ') AS 'person_in_charge'
 FROM
     lainaus
         INNER JOIN
@@ -244,7 +251,7 @@ USE `db_1`$$
 CREATE PROCEDURE GetLoans()
 BEGIN
 SELECT 
-    laite.id,
+    laite.id as 'id',
     laite.koodi as 'code',
     laitetyyppi.nimi as 'name',
     laitetyyppi.tiedot as 'info',
@@ -253,7 +260,7 @@ SELECT
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'condition',
     GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-        SEPARATOR ', ') AS 'person in charge'
+        SEPARATOR ', ') AS 'person_in_charge'
 FROM
     lainaus
         INNER JOIN
@@ -267,7 +274,6 @@ FROM
         LEFT OUTER JOIN
     henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
 GROUP BY lainaus.id;
-
 END$$
 
 DELIMITER ;
@@ -286,9 +292,7 @@ CREATE PROCEDURE NewLoan(
 		personInCharge int,
 		loanerID int, 
         loanCondition varchar(20),
-        loanDays int,
-        
-	OUT output varchar(20)
+        loanDays int
 	)
    BEGIN
    start transaction;
@@ -312,12 +316,11 @@ CREATE PROCEDURE NewLoan(
 			insert into lainaus (laite_id, lainaaja_id, vastuuhenkilo_lainaus_id, kunto_lainaus, lainausaika, palautusaika)
 			values ( deviceID, loanerID, personInCharge, loanCondition, now(), (curdate() + interval loanDays day + interval 24*60*60 - 1 second));
 			
-            SET output = ROW_COUNT();
-			SELECT output;
+            
+			SELECT LAST_INSERT_ID() as id;
             commit;
         ELSE
-			SET output = 'v‰‰r‰ vastuuhenkilˆ';
-			SELECT output;
+			SELECT -1 as id;
             rollback;
 		END IF;
 END$$
@@ -325,17 +328,42 @@ END$$
 DELIMITER ;
 
 -- -----------------------------------------------------
--- procedure test
+-- procedure GetLoan
 -- -----------------------------------------------------
 
 USE `db_1`;
-DROP procedure IF EXISTS `db_1`.`test`;
+DROP procedure IF EXISTS `db_1`.`GetLoan`;
 
 DELIMITER $$
 USE `db_1`$$
-create procedure test()
-	BEGIN
-    select * from henkilo;
+CREATE PROCEDURE GetLoan(
+	IN loanId int
+)
+BEGIN
+SELECT 
+    laite.id as 'id',
+    laite.koodi as 'code',
+    laitetyyppi.nimi as 'name',
+    laitetyyppi.tiedot as 'info',
+    CONCAT_WS(' ', lainaaja.etunimi, lainaaja.sukunimi) AS 'loaner',
+    lainaus.lainausaika as 'begins',
+    lainaus.palautusaika AS 'ends',
+    lainaus.kunto_lainaus AS 'condition',
+    GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
+        SEPARATOR ', ') AS 'person_in_charge'
+FROM
+    lainaus
+        INNER JOIN
+    laite ON (lainaus.laite_id = laite.id AND lainaus.id = loanId)
+        INNER JOIN
+    laitetyyppi ON (laite.laitetyyppi_id = laitetyyppi.id)
+        INNER JOIN
+    henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
+        LEFT OUTER JOIN
+    vastuuhenkilo ON (laitetyyppi.id = vastuuhenkilo.laitetyyppi_id)
+        LEFT OUTER JOIN
+    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
+GROUP BY lainaus.id;
 END$$
 
 DELIMITER ;
@@ -378,8 +406,8 @@ USE `db_1`;
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'teemu', 'teekkari', 'opiskelija');
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'aki', 'opettaja', 'opettaja');
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'timo', 'tarkka', 'opettaja');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'sanna', 'nyk‰nen', 'opiskelija');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'kalle', 'j‰rvinen', 'opiskelija');
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'sanna', 'nyk√§nen', 'opiskelija');
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'kalle', 'j√§rvinen', 'opiskelija');
 
 COMMIT;
 
@@ -391,8 +419,8 @@ START TRANSACTION;
 USE `db_1`;
 INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 1, 4, 2, NULL, 'uusi', NULL, '2018-10-16 20:00:00', '2018-10-25 00:00:00', NULL);
 INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 2, 1, 2, NULL, 'uusi', NULL, '2018-10-5 20:00:00', '2018-10-12 00:00:00', NULL);
-INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, 3, 'hyv‰', 'hyv‰', '2018-10-10 08:07:00', '2018-10-16 00:00:00', '2018-10-14 11:00:00');
-INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, NULL, 'hyv‰', NULL, '2018-10-18 07:30:00', '2018-10-24 00:00:00', NULL);
+INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, 3, 'hyv√§', 'hyv√§', '2018-10-10 08:07:00', '2018-10-16 00:00:00', '2018-10-14 11:00:00');
+INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, NULL, 'hyv√§', NULL, '2018-10-18 07:30:00', '2018-10-24 00:00:00', NULL);
 
 COMMIT;
 
