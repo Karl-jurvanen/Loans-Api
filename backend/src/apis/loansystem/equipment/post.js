@@ -50,7 +50,7 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
     ctx.set('Location', newUrl);
 
     // Return the new todo
-    ctx.body = data;
+    ctx.body = data[0][0];
   } catch (error) {
     if (error.errno === 1452) {
       console.error('ERROR NUMBER', error.errno);
