@@ -15,34 +15,16 @@ CREATE SCHEMA IF NOT EXISTS `db_1` DEFAULT CHARACTER SET utf8 ;
 USE `db_1` ;
 
 -- -----------------------------------------------------
--- Table `db_1`.`laitetyyppi`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_1`.`laitetyyppi` ;
-
-CREATE TABLE IF NOT EXISTS `db_1`.`laitetyyppi` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `nimi` VARCHAR(45) NULL,
-  `tiedot` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `db_1`.`laite`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_1`.`laite` ;
 
 CREATE TABLE IF NOT EXISTS `db_1`.`laite` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `laitetyyppi_id` INT NOT NULL,
   `koodi` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_Laite_Laitetyyppi1_idx` (`laitetyyppi_id` ASC),
-  CONSTRAINT `fk_Laite_Laitetyyppi1`
-    FOREIGN KEY (`laitetyyppi_id`)
-    REFERENCES `db_1`.`laitetyyppi` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE)
+  `nimi` VARCHAR(45) NULL,
+  `tiedot` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 
@@ -110,19 +92,19 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `db_1`.`vastuuhenkilo` ;
 
 CREATE TABLE IF NOT EXISTS `db_1`.`vastuuhenkilo` (
+  `laite_id` INT NOT NULL,
   `henkilo_id` INT NOT NULL,
-  `laitetyyppi_id` INT NOT NULL,
-  PRIMARY KEY (`henkilo_id`, `laitetyyppi_id`),
-  INDEX `fk_Henkilo_has_Laite_Henkilo1_idx` (`henkilo_id` ASC),
-  INDEX `fk_vastuuhenkilo_laitetyyppi1_idx` (`laitetyyppi_id` ASC),
-  CONSTRAINT `fk_Henkilo_has_Laite_Henkilo1`
-    FOREIGN KEY (`henkilo_id`)
-    REFERENCES `db_1`.`henkilo` (`id`)
+  PRIMARY KEY (`laite_id`, `henkilo_id`),
+  INDEX `fk_laite_has_henkilo_henkilo1_idx` (`henkilo_id` ASC),
+  INDEX `fk_laite_has_henkilo_laite1_idx` (`laite_id` ASC),
+  CONSTRAINT `fk_laite_has_henkilo_laite1`
+    FOREIGN KEY (`laite_id`)
+    REFERENCES `db_1`.`laite` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE,
-  CONSTRAINT `fk_vastuuhenkilo_laitetyyppi1`
-    FOREIGN KEY (`laitetyyppi_id`)
-    REFERENCES `db_1`.`laitetyyppi` (`id`)
+  CONSTRAINT `fk_laite_has_henkilo_henkilo1`
+    FOREIGN KEY (`henkilo_id`)
+    REFERENCES `db_1`.`henkilo` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
@@ -145,19 +127,17 @@ CREATE PROCEDURE GetDevices()
 SELECT 
     laite.id,
     laite.koodi as 'code',
-    laitetyyppi.nimi as 'name',
-    laitetyyppi.tiedot as 'info',
-    GROUP_CONCAT( DISTINCT CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi)
-    SEPARATOR ', ') AS 'person_in_charge'
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
+    henkilo.id AS 'personInChargeId',
+    henkilo.etunimi AS 'personInChargeFirstName',
+    henkilo.sukunimi AS 'personInChargeLastName'
 FROM
-    laitetyyppi
+    laite
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laitetyyppi.id = vastuuhenkilo.laitetyyppi_id)
+    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
         LEFT OUTER JOIN
     henkilo ON (vastuuhenkilo.henkilo_id = henkilo.id)
-        INNER JOIN
-    laite ON (laitetyyppi.id = laite.laitetyyppi_id)
-GROUP BY laite.koodi
 );
 
 END$$
@@ -180,21 +160,19 @@ CREATE PROCEDURE GetDevice(
    SELECT 
 	laite.id,
     laite.koodi as 'code',
-    laitetyyppi.nimi as 'name',
-    laitetyyppi.tiedot as 'info',
-    GROUP_CONCAT( DISTINCT CONCAT_WS(' ', henkilo.etunimi, henkilo.sukunimi)
-    SEPARATOR ', ') AS 'person_in_charge'
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
+    henkilo.id AS 'personInChargeId',
+    henkilo.etunimi AS 'personInChargeFirstName',
+    henkilo.sukunimi AS 'personInChargeLastName'
 FROM
     laite,
-    laitetyyppi,
     vastuuhenkilo,
     henkilo
 WHERE
-    laite.laitetyyppi_id = laitetyyppi.id
-        AND laitetyyppi.id = vastuuhenkilo.laitetyyppi_id
+		laite.id = vastuuhenkilo.laite_id
         AND henkilo.id = vastuuhenkilo.henkilo_id
-        AND laite.id = deviceID
-GROUP BY laite.id;
+        AND laite.id = deviceID;
    END$$
 
 DELIMITER ;
@@ -214,27 +192,27 @@ BEGIN
 SELECT 
     laite.id,
     laite.koodi as 'code',
-    laitetyyppi.nimi as 'name',
-    laitetyyppi.tiedot as 'info',
-    CONCAT_WS(' ', lainaaja.etunimi, lainaaja.sukunimi) AS 'loaner',
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
+    lainaaja.id AS 'loanerId',
+    lainaaja.etunimi AS 'loanerFirstName',
+    lainaaja.sukunimi AS 'loanerLastName',
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'condition',
-    GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-        SEPARATOR ', ') AS 'person_in_charge'
+    vastuuh.id AS 'personInChargeId',
+    vastuuh.etunimi AS 'personInChargeFirstName',
+    vastuuh.sukunimi AS 'personInChargeLastName'
 FROM
     lainaus
         INNER JOIN
     laite ON (lainaus.laite_id = laite.id AND lainaus.palautettu_aika IS NULL AND lainaus.palautusaika < now())
         INNER JOIN
-    laitetyyppi ON (laite.laitetyyppi_id = laitetyyppi.id)
-        INNER JOIN
     henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laitetyyppi.id = vastuuhenkilo.laitetyyppi_id)
+    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
         LEFT OUTER JOIN
-    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
-GROUP BY lainaus.id;
+    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id);
 END$$
 
 DELIMITER ;
@@ -251,29 +229,32 @@ USE `db_1`$$
 CREATE PROCEDURE GetLoans()
 BEGIN
 SELECT 
-    laite.id as 'id',
+	lainaus.id as 'id',
+    laite.id as 'device_id',
     laite.koodi as 'code',
-    laitetyyppi.nimi as 'name',
-    laitetyyppi.tiedot as 'info',
-    CONCAT_WS(' ', lainaaja.etunimi, lainaaja.sukunimi) AS 'loaner',
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
+    lainaaja.id AS 'loanerId',
+    lainaaja.etunimi AS 'loanerFirstName',
+    lainaaja.sukunimi AS 'loanerLastName',
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
-    lainaus.kunto_lainaus AS 'condition',
-    GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-        SEPARATOR ', ') AS 'person_in_charge'
+    lainaus.kunto_lainaus AS 'conditionLoaned',
+    lainaus.palautettu_aika AS 'timeReturned',
+    lainaus.kunto_palautus AS 'conditionReturned',
+	vastuuh.id AS 'personInChargeId',
+    vastuuh.etunimi AS 'personInChargeFirstName',
+    vastuuh.sukunimi AS 'personInChargeLastName'
 FROM
     lainaus
         INNER JOIN
-    laite ON (lainaus.laite_id = laite.id AND lainaus.palautettu_aika IS NULL)
-        INNER JOIN
-    laitetyyppi ON (laite.laitetyyppi_id = laitetyyppi.id)
+    laite ON (lainaus.laite_id = laite.id)
         INNER JOIN
     henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laitetyyppi.id = vastuuhenkilo.laitetyyppi_id)
+    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
         LEFT OUTER JOIN
-    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
-GROUP BY lainaus.id;
+    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id);
 END$$
 
 DELIMITER ;
@@ -297,18 +278,16 @@ CREATE PROCEDURE NewLoan(
    BEGIN
    start transaction;
    
-   #check if person in charge if device given matches with database
+   #check if person in charge of device given matches with database
 	 IF EXISTS (SELECT
 		laite.koodi,
-		laitetyyppi.nimi,
+		laite.nimi,
 		CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
 			AS 'Vastuuhenkilo'
 	FROM
 		vastuuhenkilo
 			INNER JOIN
-		laitetyyppi ON (vastuuhenkilo.laitetyyppi_id = laitetyyppi.id)
-			INNER JOIN
-			laite on (laitetyyppi.id = laite.laitetyyppi_id AND laite.id = deviceID)
+		laite ON (vastuuhenkilo.laite_id = laite.id AND laite.id = deviceID)
 			INNER JOIN
 		henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id AND vastuuh.id = personInCharge))
         
@@ -343,8 +322,8 @@ BEGIN
 SELECT 
     laite.id as 'id',
     laite.koodi as 'code',
-    laitetyyppi.nimi as 'name',
-    laitetyyppi.tiedot as 'info',
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
     CONCAT_WS(' ', lainaaja.etunimi, lainaaja.sukunimi) AS 'loaner',
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
@@ -356,11 +335,9 @@ FROM
         INNER JOIN
     laite ON (lainaus.laite_id = laite.id AND lainaus.id = loanId)
         INNER JOIN
-    laitetyyppi ON (laite.laitetyyppi_id = laitetyyppi.id)
-        INNER JOIN
     henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laitetyyppi.id = vastuuhenkilo.laitetyyppi_id)
+    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
         LEFT OUTER JOIN
     henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
 GROUP BY lainaus.id;
@@ -373,27 +350,18 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 -- -----------------------------------------------------
--- Data for table `db_1`.`laitetyyppi`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `db_1`;
-INSERT INTO `db_1`.`laitetyyppi` (`id`, `nimi`, `tiedot`) VALUES (DEFAULT, 'Arduino Nano', 'Atmega 328');
-INSERT INTO `db_1`.`laitetyyppi` (`id`, `nimi`, `tiedot`) VALUES (DEFAULT, 'Raspberry Pi', 'Broadcom BCM2837');
-INSERT INTO `db_1`.`laitetyyppi` (`id`, `nimi`, `tiedot`) VALUES (DEFAULT, 'Apple Macbook Pro', 'vuosimalli 2018');
-
-COMMIT;
-
-
--- -----------------------------------------------------
 -- Data for table `db_1`.`laite`
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_1`;
-INSERT INTO `db_1`.`laite` (`id`, `laitetyyppi_id`, `koodi`) VALUES (DEFAULT, 1, '123-555');
-INSERT INTO `db_1`.`laite` (`id`, `laitetyyppi_id`, `koodi`) VALUES (DEFAULT, 1, '123-666');
-INSERT INTO `db_1`.`laite` (`id`, `laitetyyppi_id`, `koodi`) VALUES (DEFAULT, 2, '222-000');
-INSERT INTO `db_1`.`laite` (`id`, `laitetyyppi_id`, `koodi`) VALUES (DEFAULT, 3, '555-123');
-INSERT INTO `db_1`.`laite` (`id`, `laitetyyppi_id`, `koodi`) VALUES (DEFAULT, 3, '555-152');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-555', 'Arduino', 'Atmega 328');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-666', 'Arduino', 'Atmega 328');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '222-000', 'Thinkpad', 'T420');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-123', 'Thinkpad', 'T420');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-152', 'Ipad', 'Air');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-153', 'Ipad', 'Air');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-001', 'Macbook Pro', '2018');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-002', 'Macbook Pro', '2018');
 
 COMMIT;
 
@@ -430,9 +398,15 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_1`;
-INSERT INTO `db_1`.`vastuuhenkilo` (`henkilo_id`, `laitetyyppi_id`) VALUES (2, 1);
-INSERT INTO `db_1`.`vastuuhenkilo` (`henkilo_id`, `laitetyyppi_id`) VALUES (2, 2);
-INSERT INTO `db_1`.`vastuuhenkilo` (`henkilo_id`, `laitetyyppi_id`) VALUES (3, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (1, 1);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (2, 1);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (3, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (4, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (5, 1);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (6, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (1, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (2, 2);
+INSERT INTO `db_1`.`vastuuhenkilo` (`laite_id`, `henkilo_id`) VALUES (4, 1);
 
 COMMIT;
 
