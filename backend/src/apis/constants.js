@@ -18,5 +18,8 @@ export const userPath = `${usersPath}/:id`;
 export const equipmentsPath = `${apiPath}/equipment`;
 export const equipmentPath = `${equipmentsPath}/:id`;
 
+export const equipmentAdminsPath = `${equipmentPath}/admins`;
+export const equipmentAdminPath = `${equipmentPath}/admins/:adminId`;
+
 export const loansPath = `${apiPath}/loans`;
 export const loanPath = `${loansPath}/:id`;
