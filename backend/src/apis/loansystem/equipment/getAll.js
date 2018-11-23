@@ -3,35 +3,7 @@ import Url from 'url';
 import { connectionSettings } from '../../../settings';
 import { loanSystem, equipmentsPath } from '../../constants';
 import { checkAccept } from '../../../middleware';
-import { parseSortQuery } from '../../../helpers';
-
-function nestDeviceById(list) {
-  return list.reduce((acc, item) => {
-    const { id } = item;
-    const index = acc.findIndex(x => x.id === id);
-    if (index === -1) {
-      acc.push({
-        id: item.id,
-        name: item.name,
-        info: item.info,
-        personInCharge: [
-          {
-            id: item.personInChargeId,
-            firstName: item.personInChargeFirstName,
-            lastName: item.personInChargeLastName,
-          },
-        ],
-      });
-    } else {
-      acc[index].personInCharge.push({
-        id: item.personInChargeId,
-        firstName: item.personInChargeFirstName,
-        lastName: item.personInChargeLastName,
-      });
-    }
-    return acc;
-  }, []);
-}
+import { parseSortQuery, parseEquipmentById } from '../../../helpers';
 
 export default loanSystem.get(`${equipmentsPath}`, checkAccept, async (ctx) => {
   const url = Url.parse(ctx.url, true);
@@ -57,8 +29,8 @@ export default loanSystem.get(`${equipmentsPath}`, checkAccept, async (ctx) => {
             ${orderBy};
           `);
 
-    // Return all todos
-    ctx.body = nestDeviceById(data);
+    // Return all equipment parsed by id
+    ctx.body = parseEquipmentById(data);
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);

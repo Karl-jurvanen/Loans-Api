@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import { connectionSettings } from '../../../settings';
 import { loanSystem, equipmentPath } from '../../constants';
 import { checkAccept } from '../../../middleware';
+import { parseEquipmentById } from '../../../helpers';
 
 export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
   const { id } = ctx.params;
@@ -20,7 +21,9 @@ export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
       { id },
     );
 
-    ctx.body = data[0][0];
+    // parseEquipmentById returns an object in an array, so here we take first element of the array
+    // to just get the object
+    ctx.body = parseEquipmentById(data[0])[0];
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
