@@ -166,13 +166,13 @@ CREATE PROCEDURE GetDevice(
     henkilo.etunimi AS 'personInChargeFirstName',
     henkilo.sukunimi AS 'personInChargeLastName'
 FROM
-    laite,
-    vastuuhenkilo,
-    henkilo
+    laite
+        LEFT OUTER JOIN
+    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
+        LEFT OUTER JOIN
+    henkilo ON (vastuuhenkilo.henkilo_id = henkilo.id)
 WHERE
-		laite.id = vastuuhenkilo.laite_id
-        AND henkilo.id = vastuuhenkilo.henkilo_id
-        AND laite.id = deviceID;
+	laite.id = deviceID;
    END$$
 
 DELIMITER ;
@@ -345,6 +345,47 @@ END$$
 
 DELIMITER ;
 
+-- -----------------------------------------------------
+-- procedure NewDevice
+-- -----------------------------------------------------
+
+USE `db_1`;
+DROP procedure IF EXISTS `db_1`.`NewDevice`;
+
+DELIMITER $$
+USE `db_1`$$
+CREATE PROCEDURE NewDevice(
+	IN 	deviceCode varchar(20),
+        deviceName varchar(20),
+        deviceInfo varchar(45),
+        personInChargeId int
+	)
+   BEGIN
+   
+	DECLARE id INT;
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+		BEGIN
+			ROLLBACK;
+            RESIGNAL;
+		END;
+	START TRANSACTION;
+	
+   
+    
+	INSERT INTO laite(koodi, nimi, tiedot)
+    VALUES(deviceCode, deviceName, deviceInfo);
+	SET id = last_insert_id();
+    
+    INSERT INTO vastuuhenkilo(laite_id, henkilo_id)
+    VALUES(id, personInChargeId);
+    
+    SELECT id as 'insertId';
+    
+    COMMIT;
+END$$
+
+DELIMITER ;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
@@ -374,8 +415,8 @@ USE `db_1`;
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'teemu', 'teekkari', 'opiskelija');
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'aki', 'opettaja', 'opettaja');
 INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'timo', 'tarkka', 'opettaja');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'sanna', 'nyk√§nen', 'opiskelija');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'kalle', 'j√§rvinen', 'opiskelija');
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'sanna', 'nyk‰nen', 'opiskelija');
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'kalle', 'j‰rvinen', 'opiskelija');
 
 COMMIT;
 
@@ -387,8 +428,8 @@ START TRANSACTION;
 USE `db_1`;
 INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 1, 4, 2, NULL, 'uusi', NULL, '2018-10-16 20:00:00', '2018-10-25 00:00:00', NULL);
 INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 2, 1, 2, NULL, 'uusi', NULL, '2018-10-5 20:00:00', '2018-10-12 00:00:00', NULL);
-INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, 3, 'hyv√§', 'hyv√§', '2018-10-10 08:07:00', '2018-10-16 00:00:00', '2018-10-14 11:00:00');
-INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, NULL, 'hyv√§', NULL, '2018-10-18 07:30:00', '2018-10-24 00:00:00', NULL);
+INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, 3, 'hyv‰', 'hyv‰', '2018-10-10 08:07:00', '2018-10-16 00:00:00', '2018-10-14 11:00:00');
+INSERT INTO `db_1`.`lainaus` (`id`, `laite_id`, `lainaaja_id`, `vastuuhenkilo_lainaus_id`, `vastuuhenkilo_palautus_id`, `kunto_lainaus`, `kunto_palautus`, `lainausaika`, `palautusaika`, `palautettu_aika`) VALUES (DEFAULT, 3, 1, 3, NULL, 'hyv‰', NULL, '2018-10-18 07:30:00', '2018-10-24 00:00:00', NULL);
 
 COMMIT;
 
