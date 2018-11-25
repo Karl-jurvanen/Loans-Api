@@ -11,7 +11,7 @@ export default loanSystem.get(`${equipmentsPath}`, checkAccept, async (ctx) => {
 
   const orderBy = parseSortQuery({
     urlSortQuery: sort,
-    whitelist: ['id', 'code', 'name', 'info', 'person_in_charge'],
+    whitelist: ['id', 'code', 'name', 'info'],
   });
 
   try {
