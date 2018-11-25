@@ -1,9 +1,10 @@
 import mysql from 'mysql2/promise';
 import Router from 'koa-router';
 import { connectionSettings } from '../../../../settings';
-import { loanSystem, koaBody, equipmentAdminsPath } from '../../../constants';
+import {
+  loanSystem, koaBody, equipmentAdminsPath, equipmentAdminPath,
+} from '../../../constants';
 import { checkAccept, checkContent } from '../../../../middleware';
-import { parseEquipmentById } from '../../../../helpers';
 
 // POST /resource
 export default loanSystem.post(
@@ -27,17 +28,15 @@ export default loanSystem.post(
     try {
       const conn = await mysql.createConnection(connectionSettings);
 
-      const [status] = await conn.execute(
+      await conn.execute(
         `
         INSERT INTO vastuuhenkilo(laite_id, henkilo_id)
         VALUES(:equipmentId, :userId);
               `,
         { equipmentId: id, userId },
       );
-      // newDevice returns last inserted id in result set
-      const { insertId } = status;
 
-      // Get the new device
+      // Get the new person
       const [data] = await conn.execute(
         `
       SELECT 
@@ -61,10 +60,9 @@ export default loanSystem.post(
       ctx.status = 201;
 
       // Set the Location header to point to the new resource
-      const newUrl = `${ctx.host}${Router.url(equipmentAdminsPath, { id: insertId })}`;
+      const newUrl = `${ctx.host}${Router.url(equipmentAdminPath, { id, adminId: userId })}`;
       ctx.set('Location', newUrl);
 
-      // ctx.body = parseEquipmentById(data[0])[0];
       ctx.body = data[0];
     } catch (error) {
       // Error 1452 is mySQL error for foreign key violation,
