@@ -100,12 +100,12 @@ CREATE TABLE IF NOT EXISTS `db_1`.`vastuuhenkilo` (
   CONSTRAINT `fk_laite_has_henkilo_laite1`
     FOREIGN KEY (`laite_id`)
     REFERENCES `db_1`.`laite` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_laite_has_henkilo_henkilo1`
     FOREIGN KEY (`henkilo_id`)
     REFERENCES `db_1`.`henkilo` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
