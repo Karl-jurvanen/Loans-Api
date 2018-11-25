@@ -36,15 +36,6 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
   try {
     const conn = await mysql.createConnection(connectionSettings);
 
-    // Insert a new device
-
-    // TODO - Fix
-    // TODO make these two inserts into a transaction
-
-    // call newDevice(:code, :name, :info, :adminId);
-
-    //       INSERT INTO laite (koodi, nimi, tiedot)
-    //       VALUES ("123", "mac", "kone");
     const [status] = await conn.execute(
       `
       call newDevice(:code, :name, :info, :adminId);
@@ -56,11 +47,11 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
         adminId,
       },
     );
+
+    // newDevice returns last inserted id in result set
     const { insertId } = status[0][0];
-    console.log(status);
-    console.log(status[0]);
-    console.log(insertId);
-    // Get the new todo
+
+    // Get the new device
     const [data] = await conn.execute(
       `
               call getDevice(:id);
@@ -77,6 +68,9 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
 
     ctx.body = parseEquipmentById(data[0])[0];
   } catch (error) {
+    // Error 1452 is mySQL error for foreign key violation,
+    // meaning that person id given does not exist
+    // Throw with a specific message
     if (error.errno === 1452) {
       console.error('ERROR NUMBER', error.errno);
       ctx.throw(400, 'Person in charge of device must first exist in people');
