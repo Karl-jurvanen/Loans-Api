@@ -320,16 +320,22 @@ CREATE PROCEDURE GetLoan(
 )
 BEGIN
 SELECT 
-    laite.id as 'id',
+	lainaus.id as 'id',
+    laite.id as 'device_id',
     laite.koodi as 'code',
     laite.nimi as 'name',
     laite.tiedot as 'info',
-    CONCAT_WS(' ', lainaaja.etunimi, lainaaja.sukunimi) AS 'loaner',
+    lainaaja.id AS 'loanerId',
+    lainaaja.etunimi AS 'loanerFirstName',
+    lainaaja.sukunimi AS 'loanerLastName',
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
-    lainaus.kunto_lainaus AS 'condition',
-    GROUP_CONCAT(CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-        SEPARATOR ', ') AS 'person_in_charge'
+    lainaus.kunto_lainaus AS 'conditionLoaned',
+    lainaus.palautettu_aika AS 'timeReturned',
+    lainaus.kunto_palautus AS 'conditionReturned',
+	vastuuh.id AS 'personInChargeId',
+    vastuuh.etunimi AS 'personInChargeFirstName',
+    vastuuh.sukunimi AS 'personInChargeLastName'
 FROM
     lainaus
         INNER JOIN
@@ -339,8 +345,7 @@ FROM
         LEFT OUTER JOIN
     vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
         LEFT OUTER JOIN
-    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id)
-GROUP BY lainaus.id;
+    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id);
 END$$
 
 DELIMITER ;
