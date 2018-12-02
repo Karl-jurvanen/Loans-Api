@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `db_1`.`laite` (
   `koodi` VARCHAR(45) NULL,
   `nimi` VARCHAR(45) NULL,
   `tiedot` VARCHAR(255) NULL,
+  `laitecol` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -240,7 +241,7 @@ SELECT
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'conditionLoaned',
-    lainaus.palautettu_aika AS 'timeReturned',
+    lainaus.palautettu_aika AS 'returned',
     lainaus.kunto_palautus AS 'conditionReturned',
 	vastuuh.id AS 'personInChargeId',
     vastuuh.etunimi AS 'personInChargeFirstName',
@@ -331,7 +332,7 @@ SELECT
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'conditionLoaned',
-    lainaus.palautettu_aika AS 'timeReturned',
+    lainaus.palautettu_aika AS 'returned',
     lainaus.kunto_palautus AS 'conditionReturned',
 	vastuuh.id AS 'personInChargeId',
     vastuuh.etunimi AS 'personInChargeFirstName',
@@ -400,14 +401,14 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_1`;
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-555', 'Arduino', 'Atmega 328');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-666', 'Arduino', 'Atmega 328');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '222-000', 'Thinkpad', 'T420');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-123', 'Thinkpad', 'T420');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-152', 'Ipad', 'Air');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-153', 'Ipad', 'Air');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-001', 'Macbook Pro', '2018');
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-002', 'Macbook Pro', '2018');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '123-555', 'Arduino', 'Atmega 328', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '123-666', 'Arduino', 'Atmega 328', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '222-000', 'Thinkpad', 'T420', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-123', 'Thinkpad', 'T420', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-152', 'Ipad', 'Air', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-153', 'Ipad', 'Air', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '610-001', 'Macbook Pro', '2018', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '610-002', 'Macbook Pro', '2018', NULL);
 
 COMMIT;
 

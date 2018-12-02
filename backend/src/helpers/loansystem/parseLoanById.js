@@ -12,6 +12,11 @@ function parseLoanById(list) {
         code: item.code,
         name: item.name,
         info: item.info,
+        begins: item.begins,
+        ends: item.ends,
+        returned: item.returned,
+        conditionLoaned: item.conditionLoaned,
+        conditionReturned: item.conditionReturned,
         loaner: {
           id: item.loanerId,
           firstName: item.loanerFirstName,
