@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
 import Router from 'koa-router';
-import { connectionSettings } from '../../../settings';
 import { checkAccept, checkContent } from '../../../middleware';
+import { getConnection } from '../../../sqlConnection';
 import {
   loanSystem, koaBody, usersPath, userPath,
 } from '../../constants';
@@ -25,10 +24,8 @@ export default loanSystem.post(usersPath, checkAccept, checkContent, koaBody, as
   } else if (typeof role !== 'string') {
     ctx.throw(400, 'body.role must be string');
   }
-
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
-
     const [status] = await conn.execute(
       `
         INSERT INTO henkilo(etunimi, sukunimi, rooli)
@@ -70,4 +67,5 @@ export default loanSystem.post(usersPath, checkAccept, checkContent, koaBody, as
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

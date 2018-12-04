@@ -1,5 +1,4 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../settings';
+import { getConnection } from '../../../sqlConnection';
 import { checkAccept, checkContent } from '../../../middleware';
 import { loanSystem, koaBody, userPath } from '../../constants';
 
@@ -26,10 +25,8 @@ export default loanSystem.put(userPath, checkAccept, checkContent, koaBody, asyn
   } else if (typeof role !== 'string') {
     ctx.throw(400, 'body.role must be string');
   }
-
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
-
     // Update the user
     const [status] = await conn.execute(
       `
@@ -81,4 +78,5 @@ export default loanSystem.put(userPath, checkAccept, checkContent, koaBody, asyn
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

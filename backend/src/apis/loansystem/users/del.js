@@ -1,6 +1,5 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../settings';
 import { loanSystem, userPath } from '../../constants';
+import { getConnection } from '../../../sqlConnection';
 
 // DELETE /resource/:id/
 export default loanSystem.del(userPath, async (ctx) => {
@@ -11,8 +10,8 @@ export default loanSystem.del(userPath, async (ctx) => {
     ctx.throw(400, 'id must be an integer');
   }
 
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
     const [status] = await conn.execute(
       `
               DELETE FROM henkilo
@@ -36,4 +35,5 @@ export default loanSystem.del(userPath, async (ctx) => {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });
