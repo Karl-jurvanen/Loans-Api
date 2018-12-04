@@ -1,9 +1,8 @@
-import mysql from 'mysql2/promise';
 import Url from 'url';
-import { connectionSettings } from '../../../../settings';
 import { loanSystem, equipmentAdminsPath } from '../../../constants';
 import { checkAccept } from '../../../../middleware';
 import { parseSortQuery } from '../../../../helpers';
+import { getConnection } from '../../../../sqlConnection';
 
 export default loanSystem.get(`${equipmentAdminsPath}`, checkAccept, async (ctx) => {
   const { id } = ctx.params;
@@ -17,9 +16,9 @@ export default loanSystem.get(`${equipmentAdminsPath}`, checkAccept, async (ctx)
   if (isNaN(id) || id.includes('.')) {
     ctx.throw(400, 'id must be an integer');
   }
-  try {
-    const conn = await mysql.createConnection(connectionSettings);
+  const conn = await getConnection();
 
+  try {
     const [data] = await conn.execute(
       `
     SELECT 
@@ -50,4 +49,5 @@ export default loanSystem.get(`${equipmentAdminsPath}`, checkAccept, async (ctx)
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

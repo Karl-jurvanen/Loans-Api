@@ -1,8 +1,7 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../settings';
 import { loanSystem, equipmentPath } from '../../constants';
 import { checkAccept } from '../../../middleware';
 import { parseEquipmentById } from '../../../helpers';
+import { getConnection } from '../../../sqlConnection';
 
 export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
   const { id } = ctx.params;
@@ -11,8 +10,8 @@ export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
   if (isNaN(id) || id.includes('.')) {
     ctx.throw(400, 'id must be an integer');
   }
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
     // call stored procedure GetDevice that contains query
     const [data] = await conn.execute(
       `
@@ -28,4 +27,5 @@ export default loanSystem.get(`${equipmentPath}`, checkAccept, async (ctx) => {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

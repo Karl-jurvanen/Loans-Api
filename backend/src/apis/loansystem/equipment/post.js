@@ -1,9 +1,8 @@
-import mysql from 'mysql2/promise';
 import Router from 'koa-router';
-import { connectionSettings } from '../../../settings';
 import { checkAccept, checkContent } from '../../../middleware';
 import { loanSystem, koaBody, equipmentsPath } from '../../constants';
 import { parseEquipmentById } from '../../../helpers';
+import { getConnection } from '../../../sqlConnection';
 
 // POST /resource
 export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBody, async (ctx) => {
@@ -33,9 +32,8 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
     ctx.throw(400, 'adminId must be an integer');
   }
 
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
-
     const [status] = await conn.execute(
       `
       call newDevice(:code, :name, :info, :adminId);
@@ -80,4 +78,5 @@ export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBod
       ctx.throw(500, error);
     }
   }
+  conn.release();
 });

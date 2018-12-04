@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../../settings';
 import { loanSystem, equipmentAdminPath } from '../../../constants';
 import { checkAccept } from '../../../../middleware';
+import { getConnection } from '../../../../sqlConnection';
 
 export default loanSystem.get(`${equipmentAdminPath}`, checkAccept, async (ctx) => {
   const { id, adminId } = ctx.params;
@@ -11,9 +10,10 @@ export default loanSystem.get(`${equipmentAdminPath}`, checkAccept, async (ctx) 
   } else if (isNaN(adminId) || adminId.includes('.')) {
     ctx.throw(400, 'admin id must be an integer');
   }
-  try {
-    const conn = await mysql.createConnection(connectionSettings);
 
+  const conn = await getConnection();
+
+  try {
     const [data] = await conn.execute(
       `
     SELECT 
@@ -40,4 +40,5 @@ export default loanSystem.get(`${equipmentAdminPath}`, checkAccept, async (ctx) 
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

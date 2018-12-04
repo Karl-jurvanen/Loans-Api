@@ -1,7 +1,5 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../../settings';
 import { loanSystem, equipmentAdminPath } from '../../../constants';
-
+import { getConnection } from '../../../../sqlConnection';
 // DELETE /resource/:id/admins/:adminId
 export default loanSystem.del(equipmentAdminPath, async (ctx) => {
   const { id, adminId } = ctx.params;
@@ -14,8 +12,9 @@ export default loanSystem.del(equipmentAdminPath, async (ctx) => {
     ctx.throw(400, 'adminId must be an integer');
   }
 
+  const conn = await getConnection();
+
   try {
-    const conn = await mysql.createConnection(connectionSettings);
     const [status] = await conn.execute(
       `
               DELETE FROM vastuuhenkilo
@@ -36,4 +35,5 @@ export default loanSystem.del(equipmentAdminPath, async (ctx) => {
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

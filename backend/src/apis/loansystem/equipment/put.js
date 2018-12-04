@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
-import { connectionSettings } from '../../../settings';
 import { checkAccept, checkContent } from '../../../middleware';
 import { loanSystem, koaBody, equipmentPath } from '../../constants';
+import { getConnection } from '../../../sqlConnection';
 
 // PUT /resource/:id
 export default loanSystem.put(equipmentPath, checkAccept, checkContent, koaBody, async (ctx) => {
@@ -26,9 +25,8 @@ export default loanSystem.put(equipmentPath, checkAccept, checkContent, koaBody,
     ctx.throw(400, 'body.info must be string');
   }
 
+  const conn = await getConnection();
   try {
-    const conn = await mysql.createConnection(connectionSettings);
-
     // Update the user
     const [status] = await conn.execute(
       `
@@ -73,4 +71,5 @@ export default loanSystem.put(equipmentPath, checkAccept, checkContent, koaBody,
     console.error('Error occurred:', error);
     ctx.throw(500, error);
   }
+  conn.release();
 });

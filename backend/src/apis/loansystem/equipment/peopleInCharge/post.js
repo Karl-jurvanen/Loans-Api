@@ -1,10 +1,9 @@
-import mysql from 'mysql2/promise';
 import Router from 'koa-router';
-import { connectionSettings } from '../../../../settings';
 import {
   loanSystem, koaBody, equipmentAdminsPath, equipmentAdminPath,
 } from '../../../constants';
 import { checkAccept, checkContent } from '../../../../middleware';
+import { getConnection } from '../../../../sqlConnection';
 
 // POST /resource
 export default loanSystem.post(
@@ -25,9 +24,8 @@ export default loanSystem.post(
       ctx.throw(400, 'userId must be an integer');
     }
 
+    const conn = await getConnection();
     try {
-      const conn = await mysql.createConnection(connectionSettings);
-
       await conn.execute(
         `
         INSERT INTO vastuuhenkilo(laite_id, henkilo_id)
@@ -80,5 +78,6 @@ export default loanSystem.post(
         ctx.throw(500, error);
       }
     }
+    conn.release();
   },
 );
