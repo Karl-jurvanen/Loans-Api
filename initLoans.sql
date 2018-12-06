@@ -278,20 +278,32 @@ CREATE PROCEDURE NewLoan(
         endTime datetime
 	)
    BEGIN
+   	DECLARE EXIT HANDLER FOR sqlexception
+		BEGIN
+			ROLLBACK;
+            RESIGNAL;
+		END;   
+   	DECLARE EXIT HANDLER FOR sqlstate '45000' 
+		BEGIN
+			ROLLBACK;
+            RESIGNAL;
+		END;
    start transaction;
    
+   if exists(select 1 
+	from lainaus	
+    where laite_id = deviceID AND palautettu_aika IS null)
+    then 
+		SIGNAL sqlstate '45000'
+			SET MESSAGE_TEXT = 'Already loaned', MYSQL_ERRNO = 1645;
+            rollback;
+	END IF;
+   
    #check if person in charge of device given matches with database
-	 IF EXISTS (SELECT
-		laite.koodi,
-		laite.nimi,
-		CONCAT_WS(' ', vastuuh.etunimi, vastuuh.sukunimi)
-			AS 'Vastuuhenkilo'
-	FROM
-		vastuuhenkilo
-			INNER JOIN
-		laite ON (vastuuhenkilo.laite_id = laite.id AND laite.id = deviceID)
-			INNER JOIN
-		henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id AND vastuuh.id = personInChargeLoan))
+	 IF EXISTS (SELECT * 
+		FROM
+			vastuuhenkilo WHERE laite_id = deviceID AND henkilo_id = personInChargeLoan
+			)
         
          THEN
 			insert into lainaus (laite_id, lainaaja_id, vastuuhenkilo_lainaus_id, kunto_lainaus, lainausaika, palautusaika)
@@ -301,7 +313,8 @@ CREATE PROCEDURE NewLoan(
 			SELECT LAST_INSERT_ID() AS id;
             commit;
         ELSE
-			SELECT -1 as id;
+            SIGNAL sqlstate '45000'
+			SET MESSAGE_TEXT = 'ERROR', MYSQL_ERRNO = 1644;
             rollback;
 		END IF;
 END$$
