@@ -4,4 +4,5 @@ export const connectionSettings = {
   database: 'db_1',
   password: process.env.MYSQL_ROOT_PASSWORD,
   namedPlaceholders: true,
+  dateStrings: true,
 };

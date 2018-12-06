@@ -231,7 +231,7 @@ CREATE PROCEDURE GetLoans()
 BEGIN
 SELECT 
 	lainaus.id as 'id',
-    laite.id as 'device_id',
+    laite.id as 'deviceId',
     laite.koodi as 'code',
     laite.nimi as 'name',
     laite.tiedot as 'info',
@@ -271,10 +271,11 @@ DELIMITER $$
 USE `db_1`$$
 CREATE PROCEDURE NewLoan(
 	IN 	deviceID int,
-		personInCharge int,
+		personInChargeLoan int,
 		loanerID int, 
         loanCondition varchar(20),
-        loanDays int
+        loanTime datetime,
+        endTime datetime
 	)
    BEGIN
    start transaction;
@@ -290,14 +291,14 @@ CREATE PROCEDURE NewLoan(
 			INNER JOIN
 		laite ON (vastuuhenkilo.laite_id = laite.id AND laite.id = deviceID)
 			INNER JOIN
-		henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id AND vastuuh.id = personInCharge))
+		henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id AND vastuuh.id = personInChargeLoan))
         
          THEN
 			insert into lainaus (laite_id, lainaaja_id, vastuuhenkilo_lainaus_id, kunto_lainaus, lainausaika, palautusaika)
-			values ( deviceID, loanerID, personInCharge, loanCondition, now(), (curdate() + interval loanDays day + interval 24*60*60 - 1 second));
+			values ( deviceID, loanerID, personInChargeLoan, loanCondition, loanTime, endTime);
 			
             
-			SELECT LAST_INSERT_ID() as id;
+			SELECT LAST_INSERT_ID() AS id;
             commit;
         ELSE
 			SELECT -1 as id;
@@ -322,7 +323,7 @@ CREATE PROCEDURE GetLoan(
 BEGIN
 SELECT 
 	lainaus.id as 'id',
-    laite.id as 'device_id',
+    laite.id as 'deviceId',
     laite.koodi as 'code',
     laite.nimi as 'name',
     laite.tiedot as 'info',
