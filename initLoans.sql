@@ -240,12 +240,12 @@ SELECT
     lainaaja.sukunimi AS 'loanerLastName',
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
+    vastuuhLainaus.id AS 'personInChargeLoanedId',
     lainaus.kunto_lainaus AS 'conditionLoaned',
-    lainaus.palautettu_aika AS 'returned',
+    lainaus.palautettu_aika AS 'timeReturned',
     lainaus.kunto_palautus AS 'conditionReturned',
-	vastuuh.id AS 'personInChargeId',
-    vastuuh.etunimi AS 'personInChargeFirstName',
-    vastuuh.sukunimi AS 'personInChargeLastName'
+    vastuuhPalautus.id AS 'personInChargeReturnedId'
+	
 FROM
     lainaus
         INNER JOIN
@@ -253,9 +253,9 @@ FROM
         INNER JOIN
     henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
-        LEFT OUTER JOIN
-    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id);
+    henkilo vastuuhLainaus ON (lainaus.vastuuhenkilo_lainaus_id = vastuuhLainaus.id)
+		LEFT OUTER JOIN
+    henkilo vastuuhPalautus ON (lainaus.vastuuhenkilo_palautus_id = vastuuhPalautus.id);
 END$$
 
 DELIMITER ;
@@ -332,11 +332,11 @@ SELECT
     lainaus.lainausaika as 'begins',
     lainaus.palautusaika AS 'ends',
     lainaus.kunto_lainaus AS 'conditionLoaned',
-    lainaus.palautettu_aika AS 'returned',
+    vastuuhLainaus.id AS 'personInChargeLoanedId',
+    lainaus.palautettu_aika AS 'timeReturned',
     lainaus.kunto_palautus AS 'conditionReturned',
-	vastuuh.id AS 'personInChargeId',
-    vastuuh.etunimi AS 'personInChargeFirstName',
-    vastuuh.sukunimi AS 'personInChargeLastName'
+    vastuuhPalautus.id AS 'personInChargeReturnedId'
+	
 FROM
     lainaus
         INNER JOIN
@@ -344,9 +344,9 @@ FROM
         INNER JOIN
     henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id)
         LEFT OUTER JOIN
-    vastuuhenkilo ON (laite.id = vastuuhenkilo.laite_id)
-        LEFT OUTER JOIN
-    henkilo vastuuh ON (vastuuhenkilo.henkilo_id = vastuuh.id);
+    henkilo vastuuhLainaus ON (lainaus.vastuuhenkilo_lainaus_id = vastuuhLainaus.id)
+		LEFT OUTER JOIN
+    henkilo vastuuhPalautus ON (lainaus.vastuuhenkilo_palautus_id = vastuuhPalautus.id);
 END$$
 
 DELIMITER ;

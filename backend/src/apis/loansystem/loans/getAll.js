@@ -1,7 +1,7 @@
 import Url from 'url';
 import { loanSystem, loansPath } from '../../constants';
 import { checkAccept } from '../../../middleware';
-import { parseSortQuery, parseLoanById } from '../../../helpers';
+import { parseSortQuery } from '../../../helpers';
 import { getConnection } from '../../../sqlConnection';
 
 export default loanSystem.get(`${loansPath}`, checkAccept, async (ctx) => {
@@ -20,9 +20,7 @@ export default loanSystem.get(`${loansPath}`, checkAccept, async (ctx) => {
     const [data] = await conn.execute(`
             call getLoans();
           `);
-
-    // Return all equipment parsed by id
-    ctx.body = parseLoanById(data[0]);
+    ctx.body = data[0];
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);

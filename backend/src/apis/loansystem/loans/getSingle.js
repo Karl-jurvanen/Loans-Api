@@ -1,6 +1,5 @@
 import { loanSystem, loanPath } from '../../constants';
 import { checkAccept } from '../../../middleware';
-import { parseLoanById } from '../../../helpers';
 import { getConnection } from '../../../sqlConnection';
 
 export default loanSystem.get(`${loanPath}`, checkAccept, async (ctx) => {
@@ -19,10 +18,7 @@ export default loanSystem.get(`${loanPath}`, checkAccept, async (ctx) => {
           `,
       { id },
     );
-
-    // parseEquipmentById returns an object in an array, so here we take first element of the array
-    // to just get the object
-    ctx.body = parseLoanById(data[0])[0];
+    ctx.body = data[0][0];
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);

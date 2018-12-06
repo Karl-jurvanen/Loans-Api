@@ -1,7 +1,5 @@
 import databaseReady from './databaseReady';
 import parseSortQuery from './parseSortQuery';
-import { parseEquipmentById, parseLoanById } from './loansystem';
+import { parseEquipmentById } from './loansystem';
 
-export {
-  databaseReady, parseSortQuery, parseEquipmentById, parseLoanById,
-};
+export { databaseReady, parseSortQuery, parseEquipmentById };

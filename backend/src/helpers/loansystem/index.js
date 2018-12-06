@@ -1,4 +1,4 @@
 import parseEquipmentById from './parseEquipmentById';
-import parseLoanById from './parseLoanById';
+import parseSortQuery from './parseSortQuery';
 
-export { parseEquipmentById, parseLoanById };
+export { parseEquipmentById, parseSortQuery };
