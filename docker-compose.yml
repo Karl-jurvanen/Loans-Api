@@ -28,6 +28,7 @@ services:
     volumes:
       - /var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./initLoans.sql:/docker-entrypoint-initdb.d/initLoans.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: db_rootpass
       MYSQL_DATABASE: db_1
