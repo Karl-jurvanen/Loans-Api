@@ -10,6 +10,7 @@ services:
       - ./backend:/opt/app
     environment:
       MYSQL_ROOT_PASSWORD: db_rootpass
+      JWT_SECRET: devsecret
     restart: always
   backend_test:
     build:
@@ -22,6 +23,7 @@ services:
       - ./backend:/opt/app
     environment:
       MYSQL_ROOT_PASSWORD: db_rootpass
+      JWT_SECRET: devsecret
     restart: always
   db:
     image: mysql:8.0.3

@@ -6,12 +6,12 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
   const { password } = ctx.request.body;
 
   if (password === 'admin') {
-    const token = await jwt.sign({ id: '2', admin: true }, 'verisecret', { expiresIn: '30m' });
+    const token = await jwt.sign({ id: '2', admin: true }, process.env.JWT_SECRET, { expiresIn: '30m' });
     ctx.status = 200;
     ctx.body = { token };
     console.log('ok');
   } else if (password === 'user') {
-    const token = await jwt.sign({ id: '2', admin: false }, 'verisecret', { expiresIn: '30m' });
+    const token = await jwt.sign({ id: '2', admin: false }, process.env.JWT_SECRET, { expiresIn: '30m' });
     ctx.status = 200;
     ctx.body = { token };
   } else {

@@ -1,5 +1,5 @@
 import jwt from 'koa-jwt';
 
 export default jwt({
-  secret: 'verisecret',
+  secret: process.env.JWT_SECRET,
 });
