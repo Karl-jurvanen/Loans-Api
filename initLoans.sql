@@ -406,6 +406,62 @@ END$$
 
 DELIMITER ;
 
+-- -----------------------------------------------------
+-- procedure ReturnLoan
+-- -----------------------------------------------------
+
+USE `db_1`;
+DROP procedure IF EXISTS `db_1`.`ReturnLoan`;
+
+DELIMITER $$
+USE `db_1`$$
+CREATE PROCEDURE ReturnLoan(
+	IN 	loanId int,
+		personInChargeReturn int,
+        returnCondition varchar(20),
+        returnTime datetime
+	)
+   BEGIN
+   	DECLARE EXIT HANDLER FOR sqlexception
+		BEGIN
+			ROLLBACK;
+            RESIGNAL;
+		END;   
+   	DECLARE EXIT HANDLER FOR sqlstate '45000' 
+		BEGIN
+			ROLLBACK;
+            RESIGNAL;
+		END;
+   start transaction;
+      
+   #check if person in charge of device given matches with database
+	 IF EXISTS(SELECT *
+		FROM
+			lainaus 
+				INNER JOIN 
+            laite ON ( laite.id = lainaus.laite_id AND lainaus.id = loanId)
+				INNER JOIN 
+			vastuuhenkilo ON (vastuuhenkilo.laite_id = lainaus.laite_id 
+							AND vastuuhenkilo.henkilo_id = personInChargeReturn)
+			)
+        
+         THEN
+			UPDATE lainaus 
+            SET kunto_palautus = returnCondition, 
+				vastuuhenkilo_palautus_id = personInChargeReturn,
+                palautettu_aika = returnTime
+			WHERE id = loanId;
+		SELECT loanId AS 'insertId';
+            commit;
+        ELSE
+            SIGNAL sqlstate '45000'
+			SET MESSAGE_TEXT = 'ERROR', MYSQL_ERRNO = 1644;
+            rollback;
+		END IF;
+END$$
+
+DELIMITER ;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
