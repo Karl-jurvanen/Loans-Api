@@ -69,11 +69,20 @@ export default loanSystem.post(
           personInChargeLoanId,
           loanerId,
           conditionLoan,
-          begins,
-          ends,
+          // mysql does not accept ISO timestring inserted to datetime, so this conversion is needed
+          // turn 2018-10-14T11:00:00.000Z"
+          // into 2018-10-14 11:00:00.000"
+          begins: new Date(begins)
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' '),
+          ends: new Date(ends)
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' '),
         },
       );
-      // newDevice returns last inserted id in result set
+      // newLoan returns last inserted id in result set
       const { id: insertId } = status[0][0];
       console.log('status', status);
       console.log('insertID', insertId);
@@ -81,9 +90,9 @@ export default loanSystem.post(
       // Get the new device
       const [data] = await conn.execute(
         `
-              call getLoan(:id);
+              call getLoan(:insertId);
             `,
-        { id: insertId },
+        { insertId },
       );
 
       // Set the response header to 201 Created

@@ -102,9 +102,21 @@ export default loanSystem.post(loansPath, checkAccept, checkContent, koaBody, as
         personInChargeReturnId,
         conditionLoan,
         conditionReturn,
-        begins,
-        ends,
-        timeReturned,
+        // mysql does not accept ISO timestring inserted to datetime, so this conversion is needed
+        // turn 2018-10-14T11:00:00.000Z"
+        // into 2018-10-14 11:00:00.000"
+        begins: new Date(begins)
+          .toISOString()
+          .slice(0, 19)
+          .replace('T', ' '),
+        ends: new Date(ends)
+          .toISOString()
+          .slice(0, 19)
+          .replace('T', ' '),
+        timeReturned: new Date(timeReturned)
+          .toISOString()
+          .slice(0, 19)
+          .replace('T', ' '),
       },
     );
     // newDevice returns last inserted id in result set
