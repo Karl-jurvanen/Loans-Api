@@ -1,14 +1,27 @@
 import mysql from 'mysql2/promise';
 import Router from 'koa-router';
+import JWT from 'jsonwebtoken';
 import { connectionSettings } from '../../settings';
 import {
   todosPath, todoPath, todos, koaBody,
 } from '../constants';
-import { checkAccept, checkContent } from '../../middleware';
+import {
+  checkAccept, checkContent, checkUser, jwt,
+} from '../../middleware';
 
 // POST /resource
-export default todos.post(todosPath, checkAccept, checkContent, koaBody, async (ctx) => {
+export default todos.post(todosPath, jwt, checkAccept, checkContent, koaBody, async (ctx) => {
+  const id = '5';
+
+  if ((checkUser(ctx, id)) === false) {
+    console.log('wrong user');
+    ctx.throw(401);
+  }
+
   const { text } = ctx.request.body;
+  const { authorization } = ctx.header;
+  const token = authorization.split(' ')[1];
+  console.log(token);
   console.log('.post text contains:', text);
 
   if (typeof text === 'undefined') {
@@ -20,6 +33,8 @@ export default todos.post(todosPath, checkAccept, checkContent, koaBody, async (
   try {
     const conn = await mysql.createConnection(connectionSettings);
 
+    const decoded = JWT.decode(token);
+    console.log(decoded);
     // Insert a new todo
     const [status] = await conn.execute(
       `

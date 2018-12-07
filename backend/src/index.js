@@ -2,7 +2,9 @@ import 'babel-polyfill';
 import Koa from 'koa';
 import { initDB } from './fixtures';
 import { databaseReady } from './helpers';
-import { test, todos, loanSystem } from './apis';
+import {
+  test, todos, loanSystem, login,
+} from './apis';
 
 // Initialize DB
 (async () => {
@@ -27,6 +29,8 @@ app.use(async (ctx, next) => {
 });
 
 // app.use(cors({ origin: false, credentials: true }));
+app.use(login.routes());
+app.use(login.allowedMethods());
 app.use(test.routes());
 app.use(test.allowedMethods());
 app.use(todos.routes());

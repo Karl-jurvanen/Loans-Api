@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "jsonwebtoken": "^8.4.0",
     "koa": "^2.6.1",
     "koa-bodyparser": "^4.2.1",
+    "koa-jwt": "^3.5.1",
     "koa-router": "^7.4.0",
     "mysql2": "^1.6.1"
   },

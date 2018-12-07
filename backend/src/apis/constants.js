@@ -4,7 +4,9 @@ import KoaBody from 'koa-bodyparser';
 export const test = new Router();
 export const todos = new Router();
 export const loanSystem = new Router();
+export const login = new Router();
 export const koaBody = new KoaBody();
+
 // Define API path
 export const apiPath = '/api/v1';
 
