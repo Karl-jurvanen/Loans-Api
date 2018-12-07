@@ -3,7 +3,7 @@ import getAll from './getAll';
 import getSingle from './getSingle';
 import del from './del';
 import post from './post';
-// import put from './put';
+import put from './put';
 import newloan from './new';
 
 export default loanSystem;
