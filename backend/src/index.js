@@ -12,6 +12,7 @@ import {
   await initDB();
 })();
 
+
 // The port that this server will run on, defaults to 9000
 const port = process.env.PORT || 9000;
 
