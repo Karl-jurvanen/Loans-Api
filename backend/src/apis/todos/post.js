@@ -9,12 +9,7 @@ import { checkAccept, checkContent, checkUser } from '../../middleware';
 
 // POST /resource
 export default todos.post(todosPath, checkAccept, checkContent, koaBody, async (ctx) => {
-  const id = 1;
-
-  if (checkUser(ctx, id) === false) {
-    console.log('wrong user');
-    ctx.throw(401);
-  }
+  checkUser(ctx);
 
   const { text } = ctx.request.body;
   const { authorization } = ctx.header;
