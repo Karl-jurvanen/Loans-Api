@@ -4,7 +4,9 @@ import JWT from 'jsonwebtoken';
 // An admin user can access all endpoints regardless of id,
 // an end user can only access endpoints that are specific to that user
 
-export const checkUser = (ctx, id) => {
+// if id parameter is not passes, only admin is allowed
+
+export const checkUser = (ctx, id = null) => {
   console.log('checkUser');
 
   const { authorization } = ctx.header;
@@ -13,8 +15,10 @@ export const checkUser = (ctx, id) => {
 
   console.log('id: ', decoded.id);
   console.log('admin: ', decoded.admin);
-  if (decoded.id === id) {
-    return 1;
+  if (id !== null) {
+    if (decoded.id.toString() === id.toString()) {
+      return 1;
+    }
   }
   if (decoded.admin === 'true') {
     return 1;
