@@ -6,7 +6,7 @@ import JWT from 'jsonwebtoken';
 
 // if id parameter is not passes, only admin is allowed
 
-export const checkUser = (ctx, id = null) => {
+export const checkUser = async (ctx, id = null) => {
   console.log('checkUser');
 
   const { authorization } = ctx.header;
