@@ -5,15 +5,13 @@ import { connectionSettings } from '../../settings';
 import {
   todosPath, todoPath, todos, koaBody,
 } from '../constants';
-import {
-  checkAccept, checkContent, checkUser, jwt,
-} from '../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../middleware';
 
 // POST /resource
-export default todos.post(todosPath, jwt, checkAccept, checkContent, koaBody, async (ctx) => {
-  const id = '5';
+export default todos.post(todosPath, checkAccept, checkContent, koaBody, async (ctx) => {
+  const id = 1;
 
-  if ((checkUser(ctx, id)) === false) {
+  if (checkUser(ctx, id) === false) {
     console.log('wrong user');
     ctx.throw(401);
   }

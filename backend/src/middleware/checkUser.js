@@ -11,17 +11,18 @@ export const checkUser = (ctx, id) => {
   const token = authorization.split(' ')[1];
   const decoded = JWT.decode(token);
 
+  console.log('id: ', decoded.id);
+  console.log('admin: ', decoded.admin);
   if (decoded.id === id) {
     return 1;
   }
-  if (decoded.admin === true) {
+  if (decoded.admin === 'true') {
     return 1;
   }
   console.log('wrong user');
   console.log(decoded);
   ctx.throw(401);
   return 0;
-
 
   // Move to next middleware
 };

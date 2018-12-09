@@ -2,6 +2,7 @@ import 'babel-polyfill';
 import Koa from 'koa';
 import { initDB } from './fixtures';
 import { databaseReady } from './helpers';
+import { jwt } from './middleware';
 import {
   test, todos, loanSystem, login,
 } from './apis';
@@ -11,7 +12,6 @@ import {
   await databaseReady();
   await initDB();
 })();
-
 
 // The port that this server will run on, defaults to 9000
 const port = process.env.PORT || 9000;
@@ -29,11 +29,11 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// app.use(cors({ origin: false, credentials: true }));
 app.use(login.routes());
 app.use(login.allowedMethods());
 app.use(test.routes());
 app.use(test.allowedMethods());
+app.use(jwt);
 app.use(todos.routes());
 app.use(todos.allowedMethods());
 app.use(loanSystem.routes());
