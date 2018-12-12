@@ -9,7 +9,7 @@ export default loanSystem.get(`${userPath}`, checkAccept, async (ctx) => {
   if (isNaN(id) || id.includes('.')) {
     ctx.throw(400, 'id must be an integer');
   }
-  checkUser(ctx, id);
+  await checkUser(ctx, id);
 
   const conn = await getConnection();
   try {

@@ -1,12 +1,13 @@
 import Router from 'koa-router';
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { loanSystem, koaBody, equipmentsPath } from '../../constants';
 import { parseEquipmentById } from '../../../helpers';
 import { getConnection } from '../../../sqlConnection';
 
 // POST /resource
 export default loanSystem.post(equipmentsPath, checkAccept, checkContent, koaBody, async (ctx) => {
-  // const { text } = ctx.request.body;
+  await checkUser(ctx); // only admin is allowed to use this endpoint
+
   const {
     code, name, info, adminId,
   } = ctx.request.body;

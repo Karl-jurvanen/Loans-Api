@@ -1,5 +1,6 @@
 import { loanSystem, equipmentPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
+import { checkUser } from '../../../middleware';
 
 // DELETE /resource/:id/
 export default loanSystem.del(equipmentPath, async (ctx) => {
@@ -9,6 +10,7 @@ export default loanSystem.del(equipmentPath, async (ctx) => {
   if (isNaN(id) || id.includes('.')) {
     ctx.throw(400, 'id must be an integer');
   }
+  await checkUser(ctx); // only admin is allowed to use this endpoint
 
   const conn = await getConnection();
   try {
