@@ -4,7 +4,7 @@ import { loanSystem, koaBody, loanPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
 
 // POST /resource
-export default loanSystem.patch(
+export default loanSystem.post(
   `${loanPath}/return`,
   checkAccept,
   checkContent,
@@ -81,7 +81,7 @@ export default loanSystem.patch(
       // Set the Location header to point to the new resource
       const newUrl = `${ctx.host}${Router.url(loanPath, { id })}`;
       ctx.set('Location', newUrl);
-      ctx.body = data[0];
+      ctx.body = data[0][0];
     } catch (error) {
       // Error 1452 is mySQL error for foreign key violation,
       // meaning that person id given does not exist

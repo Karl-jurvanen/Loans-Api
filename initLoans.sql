@@ -39,7 +39,11 @@ CREATE TABLE IF NOT EXISTS `db_1`.`henkilo` (
   `etunimi` VARCHAR(45) NULL,
   `sukunimi` VARCHAR(45) NULL,
   `rooli` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`))
+  `email` VARCHAR(45) NULL,
+  `salasana` VARCHAR(64) NULL,
+  `adminStatus` TINYINT(1) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC))
 ENGINE = InnoDB;
 
 
@@ -488,11 +492,11 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_1`;
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'teemu', 'teekkari', 'opiskelija');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'aki', 'opettaja', 'opettaja');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'timo', 'tarkka', 'opettaja');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'sanna', 'nykänen', 'opiskelija');
-INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`) VALUES (DEFAULT, 'kalle', 'järvinen', 'opiskelija');
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`, `email`, `salasana`, `adminStatus`) VALUES (DEFAULT, 'teemu', 'teekkari', 'opiskelija', 'test', 'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=', false);
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`, `email`, `salasana`, `adminStatus`) VALUES (DEFAULT, 'aki', 'opettaja', 'opettaja', 'admin', 'jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=', true);
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`, `email`, `salasana`, `adminStatus`) VALUES (DEFAULT, 'Pertti', 'Peruskäyttäjä', 'opiskelija', 'user@example.com', '4eGk+TyBTZOCVOb9faEvCWyZSOrnvEE3ZWICpBOg8/Q=', false);
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`, `email`, `salasana`, `adminStatus`) VALUES (DEFAULT, 'Yrjö', 'Ylläpitäjä', 'opettaja', 'admin@example.com', 'dJ8Jut6KynVWYO6xd5LaiAIY1PvcTiX77Cedf+n2XXA=', true);
+INSERT INTO `db_1`.`henkilo` (`id`, `etunimi`, `sukunimi`, `rooli`, `email`, `salasana`, `adminStatus`) VALUES (DEFAULT, 'kalle', 'järvinen', 'opiskelija', NULL, NULL, NULL);
 
 COMMIT;
 

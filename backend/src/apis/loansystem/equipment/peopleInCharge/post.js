@@ -2,7 +2,7 @@ import Router from 'koa-router';
 import {
   loanSystem, koaBody, equipmentAdminsPath, equipmentAdminPath,
 } from '../../../constants';
-import { checkAccept, checkContent } from '../../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../../middleware';
 import { getConnection } from '../../../../sqlConnection';
 
 // POST /resource
@@ -12,6 +12,8 @@ export default loanSystem.post(
   checkContent,
   koaBody,
   async (ctx) => {
+    await checkUser(ctx); // only admin is allowed to use this endpoint
+
     const { id } = ctx.params;
     const { userId } = ctx.request.body;
     console.log('.post equipmentId contains:', id);

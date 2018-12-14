@@ -1,7 +1,11 @@
 import { loanSystem, equipmentAdminPath } from '../../../constants';
 import { getConnection } from '../../../../sqlConnection';
+import { checkUser } from '../../../../middleware';
+
 // DELETE /resource/:id/admins/:adminId
 export default loanSystem.del(equipmentAdminPath, async (ctx) => {
+  await checkUser(ctx); // only admin is allowed to use this endpoint
+
   const { id, adminId } = ctx.params;
   console.log('.del id contains:', id);
   console.log('.del adminId contains:', adminId);

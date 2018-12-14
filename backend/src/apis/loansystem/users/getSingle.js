@@ -1,6 +1,6 @@
 import { loanSystem, userPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
-import { checkAccept } from '../../../middleware';
+import { checkAccept, checkUser } from '../../../middleware';
 
 export default loanSystem.get(`${userPath}`, checkAccept, async (ctx) => {
   const { id } = ctx.params;
@@ -9,6 +9,8 @@ export default loanSystem.get(`${userPath}`, checkAccept, async (ctx) => {
   if (isNaN(id) || id.includes('.')) {
     ctx.throw(400, 'id must be an integer');
   }
+  await checkUser(ctx, id);
+
   const conn = await getConnection();
   try {
     const [data] = await conn.execute(

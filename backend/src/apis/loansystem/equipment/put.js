@@ -1,9 +1,11 @@
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { loanSystem, koaBody, equipmentPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
 
 // PUT /resource/:id
 export default loanSystem.put(equipmentPath, checkAccept, checkContent, koaBody, async (ctx) => {
+  await checkUser(ctx); // only admin is allowed to use this endpoint
+
   const { id } = ctx.params;
   const { code, name, info } = ctx.request.body;
   console.log('.post code contains:', code);
