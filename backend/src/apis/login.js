@@ -21,8 +21,6 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
   const sha256 = await crypto.createHash('sha256');
   sha256.update(password, 'utf8');
   const passwordDigest = await sha256.digest('base64');
-  console.log(passwordDigest);
-
   const conn = await getConnection();
   try {
     const [data] = await conn.execute(

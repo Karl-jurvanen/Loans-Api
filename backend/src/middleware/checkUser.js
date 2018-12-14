@@ -13,8 +13,6 @@ export const checkUser = async (ctx, id = null) => {
   const token = authorization.split(' ')[1];
   const decoded = JWT.decode(token);
 
-  console.log('id: ', decoded.id);
-  console.log('admin: ', decoded.admin);
   if (id !== null) {
     if (decoded.id.toString() === id.toString()) {
       return 1;
