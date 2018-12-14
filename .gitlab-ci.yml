@@ -1,5 +1,5 @@
 variables:
-  REMOTE_HOST: deploy@172.16.6.14
+  REMOTE_HOST: deploy@172.16.7.219
   REMOTE_DIR: nodejs-mysql-app
 
 stages:
