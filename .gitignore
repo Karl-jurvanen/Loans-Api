@@ -12,3 +12,6 @@ build/
 # Files that do not belong to the root folder
 /yarn.lock
 /package.json
+
+#docker enviroment file
+.env
