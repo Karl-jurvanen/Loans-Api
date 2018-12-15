@@ -15,13 +15,15 @@ export default loanSystem.get(`${userPath}`, checkAccept, async (ctx) => {
   try {
     const [data] = await conn.execute(
       `
-        SELECT 
-            id,
-            etunimi AS 'firstName',
-            sukunimi AS 'lastName',
-            rooli AS 'role'
-        FROM henkilo
-        WHERE id = :id;
+      SELECT 
+        id,
+        etunimi AS 'firstName',
+        sukunimi AS 'lastName',
+        rooli AS 'role',
+        email, 
+        adminStatus
+      FROM henkilo
+      WHERE id = :id;
           `,
       { id },
     );

@@ -10,7 +10,7 @@ export default loanSystem.get(`${usersPath}`, checkAccept, async (ctx) => {
 
   const orderBy = parseSortQuery({
     urlSortQuery: sort,
-    whitelist: ['id', 'firstName', 'lastName', 'role'],
+    whitelist: ['id', 'firstName', 'lastName', 'role', 'email', 'adminStatus'],
   });
 
   const conn = await getConnection();
@@ -20,7 +20,9 @@ export default loanSystem.get(`${usersPath}`, checkAccept, async (ctx) => {
                 id,
                 etunimi AS 'firstName',
                 sukunimi AS 'lastName',
-                rooli AS 'role'
+                rooli AS 'role',
+                email, 
+                adminStatus
             FROM henkilo
             ${orderBy};
           `);
