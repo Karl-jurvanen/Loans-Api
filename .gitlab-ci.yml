@@ -59,6 +59,7 @@ deploy:
     # Setup env
     - echo "API_IMAGE=${API_IMAGE}" >> "${REMOTE_DIR}/.env"
     - echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" >> "${REMOTE_DIR}/.env"
+    - echo "JWT_SECRET=${JWT_SECRET}" >> "${REMOTE_DIR}/.env"
     # Copy files to server
     - rsync -r "${REMOTE_DIR}" "${REMOTE_HOST}:./"
     # Run container-setup.sh to set up Docker environment on the remote server
