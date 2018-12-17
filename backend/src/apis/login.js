@@ -41,7 +41,7 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
     const user = data[0];
     if (typeof user === 'undefined' || user === null) {
       console.log('wrong credentials');
-
+      conn.release();
       ctx.throw(401);
     }
     // if user is found, construct a token with user id and admin status embedded in
@@ -57,6 +57,7 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
     ctx.body = { token };
   } catch (error) {
     console.error('Error occurred:', error);
+    conn.release();
     ctx.throw(500, error);
   }
   conn.release();
