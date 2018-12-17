@@ -13,6 +13,7 @@
     "start": "node build/index.js"
   },
   "dependencies": {
+    "@koa/cors": "2",
     "babel-polyfill": "^6.26.0",
     "crypto": "^1.0.1",
     "jsonwebtoken": "^8.4.0",

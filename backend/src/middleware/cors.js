@@ -4,5 +4,7 @@ export const cors = async (ctx, next) => {
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Access, Authorization',
   );
+  ctx.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+
   await next();
 };
