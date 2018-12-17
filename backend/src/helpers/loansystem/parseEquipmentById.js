@@ -10,6 +10,7 @@ function parseDeviceById(list) {
         id: item.id,
         name: item.name,
         info: item.info,
+        code: item.code,
         personInCharge: [
           {
             id: item.personInChargeId,
