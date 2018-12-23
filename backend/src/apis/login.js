@@ -32,7 +32,7 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
                 rooli AS 'role',
                 adminStatus
             FROM henkilo
-            WHERE (email = :email AND salasana = :passwordDigest)
+            WHERE BINARY email LIKE :email AND salasana LIKE :passwordDigest
           `,
       { email, passwordDigest },
     );
