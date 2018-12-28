@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import crypto from 'crypto';
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { getConnection } from '../../../sqlConnection';
 import {
   loanSystem, koaBody, usersPath, userPath,
@@ -42,7 +42,7 @@ export default loanSystem.post(usersPath, checkAccept, checkContent, koaBody, as
   } else if (typeof adminStatus !== 'boolean') {
     ctx.throw(400, 'body.adminStatus must be boolean');
   }
-
+  await checkUser(ctx);
   const sha256 = await crypto.createHash('sha256');
   sha256.update(password, 'utf8');
   const passwordDigest = await sha256.digest('base64');

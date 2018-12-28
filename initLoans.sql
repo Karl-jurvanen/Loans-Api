@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS `db_1`.`laite` (
   `koodi` VARCHAR(45) NULL,
   `nimi` VARCHAR(45) NULL,
   `tiedot` VARCHAR(255) NULL,
-  `laitecol` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -466,6 +465,50 @@ END$$
 
 DELIMITER ;
 
+-- -----------------------------------------------------
+-- procedure GetMyLoans
+-- -----------------------------------------------------
+
+USE `db_1`;
+DROP procedure IF EXISTS `db_1`.`GetMyLoans`;
+
+DELIMITER $$
+USE `db_1`$$
+CREATE PROCEDURE GetMyLoans(
+	IN userId int
+	)
+BEGIN
+SELECT 
+	lainaus.id as 'id',
+    laite.id as 'deviceId',
+    laite.koodi as 'code',
+    laite.nimi as 'name',
+    laite.tiedot as 'info',
+    lainaaja.id AS 'loanerId',
+    lainaaja.etunimi AS 'loanerFirstName',
+    lainaaja.sukunimi AS 'loanerLastName',
+    lainaus.lainausaika as 'begins',
+    lainaus.palautusaika AS 'ends',
+    vastuuhLainaus.id AS 'personInChargeLoanedId',
+    lainaus.kunto_lainaus AS 'conditionLoaned',
+    lainaus.palautettu_aika AS 'timeReturned',
+    lainaus.kunto_palautus AS 'conditionReturned',
+    vastuuhPalautus.id AS 'personInChargeReturnedId'
+	
+FROM
+    lainaus
+        INNER JOIN
+    laite ON (lainaus.laite_id = laite.id)
+        INNER JOIN
+    henkilo lainaaja ON (lainaus.lainaaja_id = lainaaja.id AND lainaaja.id = userId)
+        LEFT OUTER JOIN
+    henkilo vastuuhLainaus ON (lainaus.vastuuhenkilo_lainaus_id = vastuuhLainaus.id)
+		LEFT OUTER JOIN
+    henkilo vastuuhPalautus ON (lainaus.vastuuhenkilo_palautus_id = vastuuhPalautus.id);
+END$$
+
+DELIMITER ;
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
@@ -475,14 +518,14 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_1`;
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '123-555', 'Arduino', 'Atmega 328', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '123-666', 'Arduino', 'Atmega 328', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '222-000', 'Thinkpad', 'T420', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-123', 'Thinkpad', 'T420', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-152', 'Ipad', 'Air', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '555-153', 'Ipad', 'Air', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '610-001', 'Macbook Pro', '2018', NULL);
-INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`, `laitecol`) VALUES (DEFAULT, '610-002', 'Macbook Pro', '2018', NULL);
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-555', 'Arduino', 'Atmega 328');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '123-666', 'Arduino', 'Atmega 328');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '222-000', 'Thinkpad', 'T420');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-123', 'Thinkpad', 'T420');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-152', 'Ipad', 'Air');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '555-153', 'Ipad', 'Air');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-001', 'Macbook Pro', '2018');
+INSERT INTO `db_1`.`laite` (`id`, `koodi`, `nimi`, `tiedot`) VALUES (DEFAULT, '610-002', 'Macbook Pro', '2018');
 
 COMMIT;
 

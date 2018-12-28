@@ -1,11 +1,12 @@
 import Router from 'koa-router';
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { loanSystem, koaBody, loansPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
 
 // POST /resource
 export default loanSystem.post(loansPath, checkAccept, checkContent, koaBody, async (ctx) => {
-  // const { text } = ctx.request.body;
+  await checkUser(ctx);
+
   const {
     deviceId,
     loanerId,

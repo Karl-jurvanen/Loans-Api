@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { getConnection } from '../../../sqlConnection';
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { loanSystem, koaBody, userPath } from '../../constants';
 
 // PUT /resource/:id
@@ -43,6 +43,7 @@ export default loanSystem.put(userPath, checkAccept, checkContent, koaBody, asyn
   } else if (typeof adminStatus !== 'boolean') {
     ctx.throw(400, 'body.adminStatus must be boolean');
   }
+  await checkUser(ctx);
   const sha256 = await crypto.createHash('sha256');
   sha256.update(password, 'utf8');
   const passwordDigest = await sha256.digest('base64');

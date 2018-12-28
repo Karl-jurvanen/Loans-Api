@@ -1,5 +1,5 @@
 import { loanSystem, loanPath } from '../../constants';
-import { checkAccept } from '../../../middleware';
+import { checkAccept, checkUser } from '../../../middleware';
 import { getConnection } from '../../../sqlConnection';
 
 export default loanSystem.get(`${loanPath}`, checkAccept, async (ctx) => {
@@ -18,7 +18,14 @@ export default loanSystem.get(`${loanPath}`, checkAccept, async (ctx) => {
           `,
       { id },
     );
-    ctx.body = data[0][0];
+    const body = data[0][0];
+    // check if user is the loaner
+    if (typeof body !== 'undefined') {
+      await checkUser(ctx, body.loanerId);
+    } else {
+      await checkUser(ctx);
+    }
+    ctx.body = body;
   } catch (error) {
     console.error('Error occurred:', error);
     ctx.throw(500, error);

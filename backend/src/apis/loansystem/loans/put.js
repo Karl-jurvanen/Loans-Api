@@ -1,9 +1,11 @@
-import { checkAccept, checkContent } from '../../../middleware';
+import { checkAccept, checkContent, checkUser } from '../../../middleware';
 import { loanSystem, koaBody, loanPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
 
 // PUT /resource/:id
 export default loanSystem.put(loanPath, checkAccept, checkContent, koaBody, async (ctx) => {
+  await checkUser(ctx);
+
   const { id } = ctx.params;
   const {
     deviceId,

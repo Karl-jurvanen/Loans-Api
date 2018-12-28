@@ -1,7 +1,7 @@
 import Url from 'url';
 import { loanSystem, usersPath } from '../../constants';
 import { getConnection } from '../../../sqlConnection';
-import { checkAccept } from '../../../middleware';
+import { checkAccept, checkUser } from '../../../middleware';
 import { parseSortQuery } from '../../../helpers';
 
 export default loanSystem.get(`${usersPath}`, checkAccept, async (ctx) => {
@@ -12,6 +12,7 @@ export default loanSystem.get(`${usersPath}`, checkAccept, async (ctx) => {
     urlSortQuery: sort,
     whitelist: ['id', 'firstName', 'lastName', 'role', 'email', 'adminStatus'],
   });
+  await checkUser(ctx);
 
   const conn = await getConnection();
   try {
