@@ -47,7 +47,11 @@ export default login.post(`${apiPath}/login`, checkAccept, checkContent, koaBody
       // if user is found, construct a token with user id and admin status embedded in
       console.log(process.env.JWT_SECRET);
       const token = await jwt.sign(
-        { id: user.id, admin: user.adminStatus ? 'true' : 'false' },
+        {
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          admin: user.adminStatus ? 'true' : 'false',
+        },
         process.env.JWT_SECRET,
         {
           expiresIn: '30m',
